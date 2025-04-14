@@ -15,7 +15,7 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
-    final path = join(await getDatabasesPath(), 'inventario_ventas2.db');
+    final path = join(await getDatabasesPath(), 'inventario_ventas3.db');
 
     return await openDatabase(
       path,
@@ -44,5 +44,19 @@ class DatabaseHelper {
     FOREIGN KEY (id_sucursal) REFERENCES sucursal (id)
     )
     ''');
+
+    await db.execute('''
+    CREATE TABLE cliente (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    correo TEXT NOT NULL
+    )
+    ''');
   }
+
+  Future<void> borrarBaseDeDatos() async {
+  final path = join(await getDatabasesPath(), 'inventario_ventas.db');
+  await deleteDatabase(path);
+  print('🧨 Base de datos eliminada en: $path');
+}
 }

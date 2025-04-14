@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inventario_ventas/core/ui/screens/cliente_screen.dart';
 import 'sucursal_screen.dart';
 import 'producto_screen.dart';
 
@@ -16,7 +17,7 @@ class HomeScreen extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.store),
             title: const Text('Sucursales'),
-            subtitle: const Text('Gestionar sucursales de la empresa'),
+            subtitle: const Text('Gestionar sucursales'),
             onTap: () {
               Navigator.push(
                 context,
@@ -25,13 +26,24 @@ class HomeScreen extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.add_box),
+            leading: const Icon(Icons.inventory),
             title: const Text('Productos'),
-            subtitle: const Text('Gestionar productos de la empresa'),
+            subtitle: const Text('Gestionar productos'),
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const ProductoScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.people),
+            title: const Text('Clientes'),
+            subtitle: const Text('Gestionar clientes'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ClienteScreen()),
               );
             },
           ),
