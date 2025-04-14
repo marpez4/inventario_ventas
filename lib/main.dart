@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:inventario_ventas/core/providers/sucursal_provider.dart';
+import 'package:inventario_ventas/core/providers/producto_provider.dart';
 import 'package:inventario_ventas/core/ui/screens/home_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -8,6 +9,7 @@ void main() {
     MultiProvider(
       providers:[
         ChangeNotifierProvider(create: (_) => SucursalProvider()),
+        ChangeNotifierProvider(create: (_) => ProductoProvider()),
       ],
       child: const MyApp(),
        )

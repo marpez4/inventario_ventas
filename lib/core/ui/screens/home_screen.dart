@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'sucursal_screen.dart';
+import 'producto_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -23,7 +24,17 @@ class HomeScreen extends StatelessWidget {
               );
             },
           ),
-          // Puedes agregar aquí más módulos (Clientes, Productos, Ventas, etc.)
+          ListTile(
+            leading: const Icon(Icons.add_box),
+            title: const Text('Productos'),
+            subtitle: const Text('Gestionar productos de la empresa'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProductoScreen()),
+              );
+            },
+          ),
         ],
       ),
     );
