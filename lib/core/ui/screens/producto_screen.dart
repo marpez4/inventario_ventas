@@ -47,7 +47,8 @@ class _ProductoScreenState extends State<ProductoScreen> {
                               showModalBottomSheet(
                                 context: context,
                                 isScrollControlled: true,
-                                builder: (_) => ProductoForm(producto: producto),
+                                builder: (_) =>
+                                    ProductoForm(producto: producto),
                               );
                             },
                           ),
@@ -76,6 +77,10 @@ class _ProductoScreenState extends State<ProductoScreen> {
                               );
                               if (confirm == true && producto.id != null) {
                                 provider.eliminarProducto(producto.id!);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('Producto eliminado!')),
+                                );
                               }
                             },
                           ),

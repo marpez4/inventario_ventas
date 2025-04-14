@@ -62,8 +62,14 @@ class _ProductoFormState extends State<ProductoForm> {
     final provider = context.read<ProductoProvider>();
     if (widget.producto == null) {
       await provider.agregarProducto(nuevoProducto);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Producto agregado exitosamente!')),
+      );
     } else {
       await provider.actualizarProducto(nuevoProducto);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Producto actualizado exitosamente!')),
+      );
     }
 
     if (mounted) Navigator.pop(context);
@@ -113,12 +119,15 @@ class _ProductoFormState extends State<ProductoForm> {
             ),
             DropdownButtonFormField<int>(
               value: _sucursalSeleccionadaId,
-              items: sucursalProvider.sucursales.map((Sucursal sucursal) {
-                return DropdownMenuItem<int>(
-                  value: sucursal.id!,
-                  child: Text(sucursal.nombre),
-                );
-              }).toList().cast<DropdownMenuItem<int>>(),
+              items: sucursalProvider.sucursales
+                  .map((Sucursal sucursal) {
+                    return DropdownMenuItem<int>(
+                      value: sucursal.id!,
+                      child: Text(sucursal.nombre),
+                    );
+                  })
+                  .toList()
+                  .cast<DropdownMenuItem<int>>(),
               decoration: const InputDecoration(labelText: 'Sucursal'),
               validator: (value) =>
                   value == null ? 'Seleccione una sucursal' : null,
