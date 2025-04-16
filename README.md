@@ -162,7 +162,7 @@ Al iniciar por primera vez la aplicación, el sistema crea automáticamente dos 
 ### 🔐 Detalles:
 
 - **Admin** tiene acceso completo a todos los módulos: sucursales, productos, ventas, clientes, usuarios, reportes.
-- **Vendedor** solo tiene acceso a funciones básicas como registrar ventas y consultar información.
+- **Vendedor** solo tiene acceso a funciones básicas como gestión de clientes, registrar ventas y consultar información.
 
 ### 🛠 ¿Cómo se crean?
 

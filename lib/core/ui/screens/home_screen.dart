@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:inventario_ventas/core/providers/auth.provider.dart';
 import 'package:inventario_ventas/core/ui/screens/cliente_screen.dart';
 import 'package:inventario_ventas/core/ui/screens/usuario.screen.dart';
 import 'package:inventario_ventas/core/ui/widgets/app_bar.dart';
+import 'package:provider/provider.dart';
 import 'sucursal_screen.dart';
 import 'producto_screen.dart';
 
@@ -10,10 +12,13 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    
     return Scaffold(
       appBar: const CustomAppBar(titulo: 'Sistema Inventario & Ventas'),
       body: ListView(
         children: [
+          if(auth.esAdmin)
           ListTile(
             leading: const Icon(Icons.store),
             title: const Text('Sucursales'),
@@ -25,6 +30,7 @@ class HomeScreen extends StatelessWidget {
               );
             },
           ),
+          if(auth.esAdmin)
           ListTile(
             leading: const Icon(Icons.inventory),
             title: const Text('Productos'),
@@ -47,6 +53,7 @@ class HomeScreen extends StatelessWidget {
               );
             },
           ),
+          if(auth.esAdmin)
           ListTile(
             leading: const Icon(Icons.people),
             title: const Text('Usuarios'),
