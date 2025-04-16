@@ -52,11 +52,15 @@ class DatabaseHelper {
     correo TEXT NOT NULL
     )
     ''');
-  }
 
-  Future<void> borrarBaseDeDatos() async {
-  final path = join(await getDatabasesPath(), 'inventario_ventas.db');
-  await deleteDatabase(path);
-  print('🧨 Base de datos eliminada en: $path');
-}
+    await db.execute('''
+    CREATE TABLE usuario (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    correo TEXT NOT NULL,
+    contrasena TEXT NOT NULL,
+    rol TEXT NOT NULL
+    )
+    ''');
+  }
 }
