@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:inventario_ventas/core/ui/screens/cliente_screen.dart';
+import 'package:inventario_ventas/core/ui/screens/usuario.screen.dart';
 import 'sucursal_screen.dart';
 import 'producto_screen.dart';
 
@@ -44,6 +45,17 @@ class HomeScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const ClienteScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.people),
+            title: const Text('Usuarios'),
+            subtitle: const Text('Gestionar usuarios del sistema'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const UsuarioScreen()),
               );
             },
           ),
