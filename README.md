@@ -150,3 +150,20 @@ La base de datos local utiliza SQLite y se estructura con las siguientes tablas 
 ---
 
 
+## 👥 Usuarios por Defecto
+
+Al iniciar por primera vez la aplicación, el sistema crea automáticamente dos usuarios predefinidos para facilitar las pruebas de login y control de acceso.
+
+| Nombre           | Rol       | Correo             | Contraseña     |
+|------------------|-----------|--------------------|----------------|
+| Admin Principal  | admin     | admin@iv.com     | admin123       |
+| Vendedor Uno     | vendedor  | vendedor@iv.com  | vendedor123    |
+
+### 🔐 Detalles:
+
+- **Admin** tiene acceso completo a todos los módulos: sucursales, productos, ventas, clientes, usuarios, reportes.
+- **Vendedor** solo tiene acceso a funciones básicas como registrar ventas y consultar información.
+
+### 🛠 ¿Cómo se crean?
+
+Estos usuarios se insertan automáticamente en la base de datos local (SQLite) cuando se genera por primera vez, en el método `_onCreate()` de `DatabaseHelper`.

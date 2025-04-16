@@ -15,7 +15,7 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
-    final path = join(await getDatabasesPath(), 'inventario_ventas3.db');
+    final path = join(await getDatabasesPath(), 'inventario_ventas4.db');
 
     return await openDatabase(
       path,
@@ -62,5 +62,20 @@ class DatabaseHelper {
     rol TEXT NOT NULL
     )
     ''');
+
+    // Insertamos usuarios por defecto
+    await db.insert('usuario', {
+      'nombre': 'Admin Principal',
+      'correo': 'admin@iv.com',
+      'contrasena': 'admin123',
+      'rol': 'admin',
+    });
+
+    await db.insert('usuario', {
+      'nombre': 'Vendedor',
+      'correo': 'vendedor@iv.com',
+      'contrasena': 'vendedor123',
+      'rol': 'vendedor',
+    });
   }
 }
