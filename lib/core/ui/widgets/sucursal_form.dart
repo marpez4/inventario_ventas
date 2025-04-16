@@ -39,8 +39,14 @@ class _SucursalFormState extends State<SucursalForm> {
 
     if (widget.sucursal == null) {
       await provider.agregarSucursal(nuevaSucursal);
+      ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Sucursal agregada exitosamente!')),
+    );
     } else {
       await provider.actualizarSucursal(nuevaSucursal);
+      ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Sucursal actualizada exitosamente!')),
+    );
     }
 
     if (mounted) Navigator.pop(context);

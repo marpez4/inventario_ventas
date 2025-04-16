@@ -72,6 +72,10 @@ class _SucursalScreenState extends State<SucursalScreen> {
                           );
                           if (confirm == true) {
                             provider.eliminarSucursal(sucursal.id!);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Sucursal eliminada!')),
+                            );
                           }
                         },
                       ),
