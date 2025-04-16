@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inventario_ventas/core/ui/widgets/app_bar.dart';
 import 'package:provider/provider.dart';
 import '../../models/cliente.dart';
 import '../../providers/cliente_provider.dart';
@@ -23,7 +24,7 @@ class _ClienteScreenState extends State<ClienteScreen> {
     final provider = context.watch<ClienteProvider>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Clientes')),
+      appBar: const CustomAppBar(titulo: 'Clientes'),
       body: provider.isLoading
           ? const Center(child: CircularProgressIndicator())
           : provider.clientes.isEmpty

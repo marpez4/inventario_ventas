@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inventario_ventas/core/ui/widgets/app_bar.dart';
 import 'package:provider/provider.dart';
 import '../../models/usuario.dart';
 import '../../providers/auth.provider.dart';
@@ -43,14 +44,8 @@ class _UsuarioScreenState extends State<UsuarioScreen> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
 
-    if (!auth.esAdmin) {
-      return const Scaffold(
-        body: Center(child: Text('Acceso restringido solo para administradores')),
-      );
-    }
-
     return Scaffold(
-      appBar: AppBar(title: const Text('Usuarios')),
+       appBar: const CustomAppBar(titulo: 'Usuarios'),
       body: _cargando
           ? const Center(child: CircularProgressIndicator())
           : _usuarios.isEmpty

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:inventario_ventas/core/ui/screens/cliente_screen.dart';
 import 'package:inventario_ventas/core/ui/screens/usuario.screen.dart';
+import 'package:inventario_ventas/core/ui/widgets/app_bar.dart';
 import 'sucursal_screen.dart';
 import 'producto_screen.dart';
 
@@ -10,9 +11,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sistema Inventario & Ventas'),
-      ),
+      appBar: const CustomAppBar(titulo: 'Sistema Inventario & Ventas'),
       body: ListView(
         children: [
           ListTile(

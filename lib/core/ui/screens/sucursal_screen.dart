@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inventario_ventas/core/ui/widgets/app_bar.dart';
 import 'package:provider/provider.dart';
 import '../../providers/sucursal_provider.dart';
 import '../widgets/sucursal_form.dart';
@@ -22,9 +23,7 @@ class _SucursalScreenState extends State<SucursalScreen> {
     final provider = context.watch<SucursalProvider>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sucursales'),
-      ),
+      appBar: const CustomAppBar(titulo: 'Sucursal'),
       body: provider.isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(

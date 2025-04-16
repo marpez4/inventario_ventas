@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inventario_ventas/core/ui/widgets/app_bar.dart';
 import 'package:provider/provider.dart';
 import '../../models/productos.dart';
 import '../../providers/producto_provider.dart';
@@ -23,9 +24,7 @@ class _ProductoScreenState extends State<ProductoScreen> {
     final provider = context.watch<ProductoProvider>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Productos'),
-      ),
+      appBar: const CustomAppBar(titulo: 'Productos'),
       body: provider.isLoading
           ? const Center(child: CircularProgressIndicator())
           : provider.productos.isEmpty
