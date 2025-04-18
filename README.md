@@ -79,18 +79,6 @@ La base de datos local utiliza SQLite y se estructura con las siguientes tablas 
 
 ---
 
-### 📊 Tabla: `inventario` (opcional, si no usas `stock` en `producto`)
-
-| Campo           | Tipo     | Descripción                                       |
-|-----------------|----------|---------------------------------------------------|
-| id_sucursal     | INTEGER  | FK a `sucursal`                                   |
-| id_producto     | INTEGER  | FK a `producto`                                   |
-| cantidad        | INTEGER  | Stock del producto en esa sucursal               |
-
-> 🔑 Clave primaria compuesta: `(id_sucursal, id_producto)`
-
----
-
 ### 👤 Tabla: `cliente`
 
 | Campo       | Tipo     | Descripción                          |
