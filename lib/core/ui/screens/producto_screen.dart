@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:inventario_ventas/core/ui/widgets/app_bar.dart';
 import 'package:provider/provider.dart';
+
 import '../../models/productos.dart';
 import '../../providers/producto_provider.dart';
+import '../../providers/sucursal_provider.dart';
+import '../widgets/app_bar.dart';
 import '../widgets/producto_form.dart';
+import '../widgets/custom_app_bar.dart';
 
 class ProductoScreen extends StatefulWidget {
-  const ProductoScreen({Key? key}) : super(key: key);
+  const ProductoScreen({super.key});
 
   @override
   State<ProductoScreen> createState() => _ProductoScreenState();
@@ -17,26 +20,43 @@ class _ProductoScreenState extends State<ProductoScreen> {
   void initState() {
     super.initState();
     context.read<ProductoProvider>().cargarProductos();
+    context.read<SucursalProvider>().cargarSucursales();
   }
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<ProductoProvider>();
+    final productos = context.watch<ProductoProvider>().productos;
+    final sucursales = context.watch<SucursalProvider>().sucursales;
 
     return Scaffold(
       appBar: const CustomAppBar(titulo: 'Productos'),
-      body: provider.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : provider.productos.isEmpty
-              ? const Center(child: Text('No hay productos registrados'))
-              : ListView.builder(
-                  itemCount: provider.productos.length,
-                  itemBuilder: (context, index) {
-                    final producto = provider.productos[index];
+      body: sucursales.isEmpty
+          ? const Center(child: Text('No hay sucursales disponibles'))
+          : ListView(
+              children: sucursales.map((sucursal) {
+                final productosSucursal = productos
+                    .where((p) => p.idSucursal == sucursal.id)
+                    .toList();
+
+                return ExpansionTile(
+                  title: Text(
+                    sucursal.nombre,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle:
+                      Text('Total de productos: ${productosSucursal.length}'),
+                  children: productosSucursal.map((producto) {
                     return ListTile(
                       title: Text(producto.nombre),
-                      subtitle: Text(
-                          'Precio: \$${producto.precio.toStringAsFixed(2)} - Stock: ${producto.stock}'),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (producto.descripcion?.isNotEmpty ?? false)
+                            Text(producto.descripcion!),
+                          Text(
+                              'Precio: \$${producto.precio.toStringAsFixed(2)}'),
+                        ],
+                      ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -59,7 +79,7 @@ class _ProductoScreenState extends State<ProductoScreen> {
                                 builder: (_) => AlertDialog(
                                   title: const Text('Eliminar producto'),
                                   content: const Text(
-                                      '¿Estás seguro de eliminar este producto?'),
+                                      '¿Deseas eliminar este producto?'),
                                   actions: [
                                     TextButton(
                                       onPressed: () =>
@@ -74,11 +94,14 @@ class _ProductoScreenState extends State<ProductoScreen> {
                                   ],
                                 ),
                               );
+
                               if (confirm == true && producto.id != null) {
-                                provider.eliminarProducto(producto.id!);
+                                await context
+                                    .read<ProductoProvider>()
+                                    .eliminarProducto(producto.id!);
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                      content: Text('Producto eliminado!')),
+                                      content: Text('Producto eliminado')),
                                 );
                               }
                             },
@@ -86,8 +109,10 @@ class _ProductoScreenState extends State<ProductoScreen> {
                         ],
                       ),
                     );
-                  },
-                ),
+                  }).toList(),
+                );
+              }).toList(),
+            ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showModalBottomSheet(

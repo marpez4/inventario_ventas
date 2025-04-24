@@ -15,7 +15,7 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
-    final path = join(await getDatabasesPath(), 'inventario_ventas4.db');
+    final path = join(await getDatabasesPath(), 'inventario_ventas7.db');
 
     return await openDatabase(
       path,
@@ -31,6 +31,31 @@ class DatabaseHelper {
     nombre TEXT NOT NULL,
     ubicacion TEXT
     );
+    ''');
+
+    await db.execute('''
+    CREATE TABLE venta (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    fecha TEXT NOT NULL,
+    id_cliente INTEGER,
+    id_sucursal INTEGER NOT NULL,
+    metodo_pago TEXT NOT NULL,
+    total REAL NOT NULL,
+    FOREIGN KEY (id_cliente) REFERENCES cliente(id),
+    FOREIGN KEY (id_sucursal) REFERENCES sucursal(id)
+    )
+    ''');
+
+    await db.execute('''
+    CREATE TABLE detalle_venta (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_venta INTEGER NOT NULL,
+    id_producto INTEGER NOT NULL,
+    cantidad INTEGER NOT NULL,
+    precio_unitario REAL NOT NULL,
+    FOREIGN KEY (id_venta) REFERENCES venta(id),
+    FOREIGN KEY (id_producto) REFERENCES producto(id)
+    )
     ''');
 
     await db.execute('''

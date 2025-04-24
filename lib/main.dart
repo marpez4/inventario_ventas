@@ -5,6 +5,7 @@ import 'package:inventario_ventas/core/providers/producto_provider.dart';
 import 'package:inventario_ventas/core/providers/auth.provider.dart';
 import 'package:inventario_ventas/core/ui/screens/home_screen.dart';
 import 'package:inventario_ventas/core/ui/screens/login_screen.dart';
+import 'package:inventario_ventas/core/ui/screens/venta_form.dart';
 import 'package:provider/provider.dart';
 
 void main() {

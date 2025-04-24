@@ -95,8 +95,8 @@ La base de datos local utiliza SQLite y se estructura con las siguientes tablas 
 |-------------|----------|-----------------------------------------------|
 | id          | INTEGER  | Clave primaria, autoincremental               |
 | nombre      | TEXT     | Nombre o nickname de usuario                  |
-| correo      | TEXT     | Correo del usuario (opcional)                 |
-| contrasena  | TEXT     | Contraseña (puede estar en texto plano)       |
+| correo      | TEXT     | Correo del usuario                            |
+| contrasena  | TEXT     | Contraseña (Texto plano)                      |
 | rol         | TEXT     | Rol del usuario (ej: `admin`, `vendedor`)     |
 
 ---
@@ -108,7 +108,7 @@ La base de datos local utiliza SQLite y se estructura con las siguientes tablas 
 | id            | INTEGER  | Clave primaria                                             |
 | fecha         | TEXT     | Fecha y hora de la venta                                   |
 | id_sucursal   | INTEGER  | FK a `sucursal`                                            |
-| id_cliente    | INTEGER  | FK a `cliente` (puede ser `NULL` si es venta sin cliente)  |
+| id_cliente    | INTEGER  | FK a `cliente` (Si es `NULL` es venta sin cliente)         |
 | metodo_pago   | TEXT     | Texto indicando método (Efectivo, Tarjeta, etc.)           |
 | total         | REAL     | Total de la venta                                          |
 
