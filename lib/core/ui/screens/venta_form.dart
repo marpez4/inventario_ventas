@@ -182,19 +182,20 @@ class _VentaFormState extends State<VentaForm> {
                   _cantidades.clear();
                 }),
               ),
+              const SizedBox(height: 12),
               DropdownButtonFormField<int>(
                 value: _clienteId,
-                decoration:
-                    const InputDecoration(labelText: 'Cliente'),
-                items: [
-                  ...clientes.map((c) => DropdownMenuItem(
-                        value: c.id,
-                        child: Text(c.nombre),
-                      ))
-                ],
+                decoration: const InputDecoration(labelText: 'Cliente'),
+                items: clientes
+                    .map((c) => DropdownMenuItem(
+                          value: c.id,
+                          child: Text(c.nombre),
+                        ))
+                    .toList(),
                 validator: (v) => v == null ? 'Seleccione un cliente' : null,
                 onChanged: (v) => setState(() => _clienteId = v),
               ),
+              const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 value: _metodoPago,
                 decoration: const InputDecoration(labelText: 'Método de pago'),
@@ -208,72 +209,92 @@ class _VentaFormState extends State<VentaForm> {
                     v == null ? 'Seleccione método de pago' : null,
                 onChanged: (v) => setState(() => _metodoPago = v),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 20),
               if (_sucursalId != null)
                 FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(50),
+                  ),
                   onPressed: () =>
                       _agregarProductoDesdeModal(productosSucursal),
                   icon: const Icon(Icons.add),
                   label: const Text('Agregar producto'),
                 ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
               const Text('Productos seleccionados:',
-                  style: TextStyle(fontSize: 16)),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const Divider(),
               if (_productosSeleccionados.isEmpty)
-                const Text('Aún no hay productos agregados.'),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Text('Aún no hay productos agregados.'),
+                ),
               ..._productosSeleccionados.entries.map((entry) {
                 final producto = entry.value;
                 final cantidad = _cantidades[entry.key] ?? 0;
                 final stockDisponible = producto.stock - cantidad;
 
-                return ListTile(
-                  title: Text(producto.nombre),
-                  subtitle: Text(
-                      'Precio: \$${producto.precio.toStringAsFixed(2)} • Stock: ${producto.stock}'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.remove),
-                        onPressed: cantidad > 0
-                            ? () {
-                                setState(() {
-                                  _cantidades[entry.key] = cantidad - 1;
-                                  if (_cantidades[entry.key]! == 0) {
-                                    _productosSeleccionados.remove(entry.key);
-                                    _cantidades.remove(entry.key);
-                                  }
-                                });
-                              }
-                            : null,
-                      ),
-                      Text('$cantidad'),
-                      IconButton(
-                        icon: const Icon(Icons.add),
-                        onPressed: stockDisponible > 0
-                            ? () {
-                                setState(() {
-                                  _cantidades[entry.key] = cantidad + 1;
-                                });
-                              }
-                            : null,
-                      ),
-                    ],
+                return Card(
+                  elevation: 2,
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  child: ListTile(
+                    title: Text(producto.nombre),
+                    subtitle: Text(
+                      'Precio: \$${producto.precio.toStringAsFixed(2)}\nStock disponible: ${producto.stock}',
+                    ),
+                    isThreeLine: true,
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.remove),
+                          onPressed: cantidad > 0
+                              ? () {
+                                  setState(() {
+                                    _cantidades[entry.key] = cantidad - 1;
+                                    if (_cantidades[entry.key]! == 0) {
+                                      _productosSeleccionados.remove(entry.key);
+                                      _cantidades.remove(entry.key);
+                                    }
+                                  });
+                                }
+                              : null,
+                        ),
+                        Text('$cantidad'),
+                        IconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: stockDisponible > 0
+                              ? () {
+                                  setState(() {
+                                    _cantidades[entry.key] = cantidad + 1;
+                                  });
+                                }
+                              : null,
+                        ),
+                      ],
+                    ),
                   ),
                 );
               }),
-              const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 8),
               Text(
                 'Total: \$${_calcularTotal().toStringAsFixed(2)}',
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87),
+                textAlign: TextAlign.right,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
               FilledButton(
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(55),
+                ),
                 onPressed: _registrarVenta,
-                child: const Text('Registrar venta'),
-              )
+                child: const Text('Registrar venta',
+                    style: TextStyle(fontSize: 18)),
+              ),
             ],
           ),
         ),

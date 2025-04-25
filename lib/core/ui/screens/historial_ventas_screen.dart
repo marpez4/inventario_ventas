@@ -50,8 +50,24 @@ class _HistorialVentasScreenState extends State<HistorialVentasScreen> {
     });
   }
 
+  List<Venta> _ventasFiltradas() {
+    return _ventas.where((venta) {
+      final fechaVenta = DateTime.parse(venta.fecha);
+
+      final coincideSucursal = _sucursalSeleccionadaId == null ||
+          venta.idSucursal == _sucursalSeleccionadaId;
+      final coincideFechaInicio = _fechaInicio == null ||
+          fechaVenta.isAfter(_fechaInicio!.subtract(const Duration(days: 1)));
+      final coincideFechaFin = _fechaFin == null ||
+          fechaVenta.isBefore(_fechaFin!.add(const Duration(days: 1)));
+
+      return coincideSucursal && coincideFechaInicio && coincideFechaFin;
+    }).toList();
+  }
+
   Future<void> _seleccionarFecha({required bool esInicio}) async {
-    final initialDate = esInicio ? _fechaInicio ?? DateTime.now() : _fechaFin ?? DateTime.now();
+    final initialDate =
+        esInicio ? _fechaInicio ?? DateTime.now() : _fechaFin ?? DateTime.now();
     final picked = await showDatePicker(
       context: context,
       initialDate: initialDate,
@@ -67,18 +83,6 @@ class _HistorialVentasScreenState extends State<HistorialVentasScreen> {
         }
       });
     }
-  }
-
-  List<Venta> _ventasFiltradas() {
-    return _ventas.where((venta) {
-      final fechaVenta = DateTime.parse(venta.fecha);
-
-      final coincideSucursal = _sucursalSeleccionadaId == null || venta.idSucursal == _sucursalSeleccionadaId;
-      final coincideFechaInicio = _fechaInicio == null || fechaVenta.isAfter(_fechaInicio!.subtract(const Duration(days: 1)));
-      final coincideFechaFin = _fechaFin == null || fechaVenta.isBefore(_fechaFin!.add(const Duration(days: 1)));
-
-      return coincideSucursal && coincideFechaInicio && coincideFechaFin;
-    }).toList();
   }
 
   @override
@@ -98,9 +102,11 @@ class _HistorialVentasScreenState extends State<HistorialVentasScreen> {
               children: [
                 DropdownButtonFormField<int?>(
                   value: _sucursalSeleccionadaId,
-                  decoration: const InputDecoration(labelText: 'Filtrar por sucursal'),
+                  decoration:
+                      const InputDecoration(labelText: 'Filtrar por sucursal'),
                   items: [
-                    const DropdownMenuItem(value: null, child: Text('Todas las sucursales')),
+                    const DropdownMenuItem(
+                        value: null, child: Text('Todas las sucursales')),
                     ...sucursales.map((s) => DropdownMenuItem(
                           value: s.id,
                           child: Text(s.nombre),
@@ -138,56 +144,102 @@ class _HistorialVentasScreenState extends State<HistorialVentasScreen> {
           const Divider(),
           Expanded(
             child: ventas.isEmpty
-                ? const Center(child: Text('No hay ventas que coincidan con el filtro'))
+                ? const Center(
+                    child: Text('No hay ventas que coincidan con el filtro'))
                 : ListView.builder(
+                    padding: const EdgeInsets.all(16),
                     itemCount: ventas.length,
                     itemBuilder: (context, index) {
                       final venta = ventas[index];
-                      final sucursal = sucursales.firstWhere((s) => s.id == venta.idSucursal);
-                      final cliente = clientes.any((c) => c.id == venta.idCliente)
+                      final sucursal = sucursales
+                          .firstWhere((s) => s.id == venta.idSucursal);
+                      final cliente = clientes
+                              .any((c) => c.id == venta.idCliente)
                           ? clientes.firstWhere((c) => c.id == venta.idCliente)
                           : null;
                       final detalles = _detallesPorVenta[venta.id!] ?? [];
+                      final fechaFormateada = DateFormat('dd/MM/yyyy')
+                          .format(DateTime.parse(venta.fecha));
 
-                      return ExpansionTile(
-                        title: Text(
-                          'Venta: \$${venta.total.toStringAsFixed(2)}',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        elevation: 3,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        subtitle: Text(
-                          'Fecha venta: ${DateFormat('dd/MM/yyyy').format(DateTime.parse(venta.fecha))} | Sucursal: ${sucursal.nombre} | Cliente: ${cliente?.nombre ?? 'Sin cliente'}',
-                        ),
-                        children: [
-                          ListTile(
-                            title: const Text('Método de pago'),
-                            subtitle: Text(venta.metodoPago),
+                        child: ExpansionTile(
+                          title: Text(
+                            'Total: \$${venta.total.toStringAsFixed(2)}',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          ...detalles.map((detalle) {
-                            final producto = productos.firstWhere(
-                              (p) => p.id == detalle.idProducto,
-                              orElse: () => Producto(
-                                id: -1,
-                                nombre: 'Producto eliminado',
-                                descripcion: '',
-                                precio: 0,
-                                stock: 0,
-                                idSucursal: -1,
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  const Icon(Icons.calendar_today, size: 14),
+                                  const SizedBox(width: 6),
+                                  Text(fechaFormateada),
+                                ],
                               ),
-                            );
-                            return ListTile(
-                              title: Text(
-                                producto.nombre,
-                                style: TextStyle(
-                                  color: producto.id == -1 ? Colors.red : null,
-                                  fontStyle: producto.id == -1 ? FontStyle.italic : null,
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  const Icon(Icons.store, size: 14),
+                                  const SizedBox(width: 6),
+                                  Text('Sucursal: ${sucursal.nombre}'),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  const Icon(Icons.person, size: 14),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                      'Cliente: ${cliente?.nombre ?? 'Sin cliente'}'),
+                                ],
+                              ),
+                            ],
+                          ),
+                          children: [
+                            ListTile(
+                              leading: const Icon(Icons.payment),
+                              title: const Text('Método de pago'),
+                              subtitle: Text(venta.metodoPago),
+                            ),
+                            const Divider(),
+                            ...detalles.map((detalle) {
+                              final producto = productos.firstWhere(
+                                (p) => p.id == detalle.idProducto,
+                                orElse: () => Producto(
+                                  id: -1,
+                                  nombre: 'Producto eliminado',
+                                  descripcion: '',
+                                  precio: 0,
+                                  stock: 0,
+                                  idSucursal: -1,
                                 ),
-                              ),
-                              subtitle: Text('Cantidad: ${detalle.cantidad}'),
-                              trailing: Text(
-                                  '\$${(detalle.precioUnitario * detalle.cantidad).toStringAsFixed(2)}'),
-                            );
-                          }),
-                        ],
+                              );
+                              return ListTile(
+                                title: Text(
+                                  producto.nombre,
+                                  style: TextStyle(
+                                    color:
+                                        producto.id == -1 ? Colors.red : null,
+                                    fontStyle: producto.id == -1
+                                        ? FontStyle.italic
+                                        : null,
+                                  ),
+                                ),
+                                subtitle: Text('Cantidad: ${detalle.cantidad}'),
+                                trailing: Text(
+                                  '\$${(detalle.precioUnitario * detalle.cantidad).toStringAsFixed(2)}',
+                                ),
+                              );
+                            }),
+                          ],
+                        ),
                       );
                     },
                   ),
