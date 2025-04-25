@@ -155,7 +155,7 @@ class _HistorialVentasScreenState extends State<HistorialVentasScreen> {
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         subtitle: Text(
-                          '${venta.fecha} | ${sucursal.nombre} | ${cliente?.nombre ?? 'Sin cliente'}',
+                          'Fecha venta: ${DateFormat('dd/MM/yyyy').format(DateTime.parse(venta.fecha))} | Sucursal: ${sucursal.nombre} | Cliente: ${cliente?.nombre ?? 'Sin cliente'}',
                         ),
                         children: [
                           ListTile(
