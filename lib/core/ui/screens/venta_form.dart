@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:inventario_ventas/core/ui/screens/historial_ventas_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/venta.dart';
@@ -12,6 +11,7 @@ import '../../services/venta_service.dart';
 import '../../providers/producto_provider.dart';
 import '../../providers/sucursal_provider.dart';
 import '../../providers/cliente_provider.dart';
+import 'historial_ventas_screen.dart';
 
 class VentaForm extends StatefulWidget {
   const VentaForm({super.key});
@@ -25,7 +25,9 @@ class _VentaFormState extends State<VentaForm> {
   int? _sucursalId;
   int? _clienteId;
   String? _metodoPago;
+
   final Map<int, int> _cantidades = {}; // idProducto : cantidad
+  final Map<int, Producto> _productosSeleccionados = {};
   final _ventaService = VentaService();
 
   @override
@@ -36,13 +38,52 @@ class _VentaFormState extends State<VentaForm> {
     context.read<ClienteProvider>().cargarClientes();
   }
 
-  double _calcularTotal(List<Producto> productos) {
+  double _calcularTotal() {
     double total = 0;
-    for (final producto in productos) {
-      final cantidad = _cantidades[producto.id] ?? 0;
+    _productosSeleccionados.forEach((id, producto) {
+      final cantidad = _cantidades[id] ?? 0;
       total += cantidad * producto.precio;
-    }
+    });
     return total;
+  }
+
+  void _agregarProductoDesdeModal(List<Producto> productosSucursal) {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => ListView(
+        children: productosSucursal.map((p) {
+          final agotado = p.stock <= 0;
+
+          return ListTile(
+            enabled: !agotado,
+            title: Text(
+              p.nombre,
+              style: TextStyle(
+                color: agotado ? Colors.grey : null,
+                fontStyle: agotado ? FontStyle.italic : null,
+              ),
+            ),
+            subtitle: Text(
+              agotado
+                  ? 'Producto agotado'
+                  : 'Stock: ${p.stock} - \$${p.precio.toStringAsFixed(2)}',
+              style: TextStyle(
+                color: agotado ? Colors.red : null,
+              ),
+            ),
+            onTap: agotado
+                ? null
+                : () {
+                    setState(() {
+                      _productosSeleccionados[p.id!] = p;
+                      _cantidades[p.id!] = (_cantidades[p.id] ?? 0) + 1;
+                    });
+                    Navigator.pop(context);
+                  },
+          );
+        }).toList(),
+      ),
+    );
   }
 
   void _registrarVenta() async {
@@ -54,9 +95,8 @@ class _VentaFormState extends State<VentaForm> {
       return;
     }
 
-    final productos = context.read<ProductoProvider>().productos;
     final fecha = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
-    final total = _calcularTotal(productos);
+    final total = _calcularTotal();
 
     final venta = Venta(
       fecha: fecha,
@@ -66,17 +106,16 @@ class _VentaFormState extends State<VentaForm> {
       total: total,
     );
 
-    final detalles = productos
-        .where((p) => (_cantidades[p.id] ?? 0) > 0)
-        .map((p) => DetalleVenta(
+    final detalles = _productosSeleccionados.entries
+        .where((e) => (_cantidades[e.key] ?? 0) > 0)
+        .map((entry) => DetalleVenta(
               idVenta: 0,
-              idProducto: p.id!,
-              cantidad: _cantidades[p.id]!,
-              precioUnitario: p.precio,
+              idProducto: entry.key,
+              cantidad: _cantidades[entry.key]!,
+              precioUnitario: entry.value.precio,
             ))
         .toList();
 
-    // Simulación de pago visual
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -86,9 +125,7 @@ class _VentaFormState extends State<VentaForm> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text('Método: $_metodoPago'),
-            const SizedBox(height: 8),
-            Text('Total: \$${total.toStringAsFixed(2)}',
-                style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text('Total: \$${total.toStringAsFixed(2)}'),
             const SizedBox(height: 16),
             const CircularProgressIndicator(),
           ],
@@ -96,13 +133,9 @@ class _VentaFormState extends State<VentaForm> {
       ),
     );
 
-    // Simular retraso de pago
-    await Future.delayed(const Duration(seconds: 10));
-
-    // Cerrar diálogo
+    await Future.delayed(const Duration(seconds: 2));
     if (context.mounted) Navigator.pop(context);
 
-    // Guardar venta
     await _ventaService.registrarVenta(venta, detalles);
 
     if (context.mounted) {
@@ -111,18 +144,19 @@ class _VentaFormState extends State<VentaForm> {
         MaterialPageRoute(builder: (_) => const HistorialVentasScreen()),
       );
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Venta registrada con éxito!')),
+        const SnackBar(content: Text('Venta registrada con éxito')),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final productos = context.watch<ProductoProvider>().productos;
     final sucursales = context.watch<SucursalProvider>().sucursales;
     final clientes = context.watch<ClienteProvider>().clientes;
-    final listaProductos = context.watch<ProductoProvider>().productos;
-    final productos =
-        listaProductos.where((p) => p.idSucursal == _sucursalId).toList();
+
+    final productosSucursal =
+        productos.where((p) => p.idSucursal == _sucursalId).toList();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Registrar venta')),
@@ -142,73 +176,25 @@ class _VentaFormState extends State<VentaForm> {
                         ))
                     .toList(),
                 validator: (v) => v == null ? 'Seleccione una sucursal' : null,
-                onChanged: (v) => setState(() => _sucursalId = v),
+                onChanged: (v) => setState(() {
+                  _sucursalId = v;
+                  _productosSeleccionados.clear();
+                  _cantidades.clear();
+                }),
               ),
               DropdownButtonFormField<int>(
                 value: _clienteId,
-                decoration: const InputDecoration(labelText: 'Cliente'),
+                decoration:
+                    const InputDecoration(labelText: 'Cliente'),
                 items: [
-                  const DropdownMenuItem(
-                      value: null, child: Text('Venta sin cliente')),
                   ...clientes.map((c) => DropdownMenuItem(
                         value: c.id,
                         child: Text(c.nombre),
                       ))
                 ],
+                validator: (v) => v == null ? 'Seleccione un cliente' : null,
                 onChanged: (v) => setState(() => _clienteId = v),
               ),
-              const SizedBox(height: 16),
-              const Text('Productos:', style: TextStyle(fontSize: 16)),
-              if (_sucursalId != null)
-                ...productos.where((p) => p.idSucursal == _sucursalId).map((p) {
-                  final stock = p.stock;
-                  final cantidad = _cantidades[p.id] ?? 0;
-                  final disponible = stock - cantidad;
-
-                  return Column(
-                    children: [
-                      ListTile(
-                        title: Text(p.nombre),
-                        subtitle: Text(
-                            'Precio: \$${p.precio.toStringAsFixed(2)} • Stock: $stock'),
-                        trailing: SizedBox(
-                          width: 120,
-                          child: Row(
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.remove),
-                                onPressed: cantidad > 0
-                                    ? () {
-                                        setState(() {
-                                          _cantidades[p.id!] = cantidad - 1;
-                                        });
-                                      }
-                                    : null,
-                              ),
-                              Text('$cantidad'),
-                              IconButton(
-                                icon: const Icon(Icons.add),
-                                onPressed: disponible > 0
-                                    ? () {
-                                        setState(() {
-                                          _cantidades[p.id!] = cantidad + 1;
-                                        });
-                                      }
-                                    : null,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const Divider()
-                    ],
-                  );
-                }).toList()
-              else
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                  child: Text('Seleccione una sucursal para ver productos'),
-                ),
               DropdownButtonFormField<String>(
                 value: _metodoPago,
                 decoration: const InputDecoration(labelText: 'Método de pago'),
@@ -219,12 +205,67 @@ class _VentaFormState extends State<VentaForm> {
                   DropdownMenuItem(value: 'PayPal', child: Text('PayPal')),
                 ],
                 validator: (v) =>
-                    v == null ? 'Seleccione un método de pago' : null,
+                    v == null ? 'Seleccione método de pago' : null,
                 onChanged: (v) => setState(() => _metodoPago = v),
               ),
+              const SizedBox(height: 12),
+              if (_sucursalId != null)
+                FilledButton.icon(
+                  onPressed: () =>
+                      _agregarProductoDesdeModal(productosSucursal),
+                  icon: const Icon(Icons.add),
+                  label: const Text('Agregar producto'),
+                ),
+              const SizedBox(height: 16),
+              const Text('Productos seleccionados:',
+                  style: TextStyle(fontSize: 16)),
+              const Divider(),
+              if (_productosSeleccionados.isEmpty)
+                const Text('Aún no hay productos agregados.'),
+              ..._productosSeleccionados.entries.map((entry) {
+                final producto = entry.value;
+                final cantidad = _cantidades[entry.key] ?? 0;
+                final stockDisponible = producto.stock - cantidad;
+
+                return ListTile(
+                  title: Text(producto.nombre),
+                  subtitle: Text(
+                      'Precio: \$${producto.precio.toStringAsFixed(2)} • Stock: ${producto.stock}'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.remove),
+                        onPressed: cantidad > 0
+                            ? () {
+                                setState(() {
+                                  _cantidades[entry.key] = cantidad - 1;
+                                  if (_cantidades[entry.key]! == 0) {
+                                    _productosSeleccionados.remove(entry.key);
+                                    _cantidades.remove(entry.key);
+                                  }
+                                });
+                              }
+                            : null,
+                      ),
+                      Text('$cantidad'),
+                      IconButton(
+                        icon: const Icon(Icons.add),
+                        onPressed: stockDisponible > 0
+                            ? () {
+                                setState(() {
+                                  _cantidades[entry.key] = cantidad + 1;
+                                });
+                              }
+                            : null,
+                      ),
+                    ],
+                  ),
+                );
+              }),
               const SizedBox(height: 16),
               Text(
-                'Total: \$${_calcularTotal(productos).toStringAsFixed(2)}',
+                'Total: \$${_calcularTotal().toStringAsFixed(2)}',
                 style:
                     const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
