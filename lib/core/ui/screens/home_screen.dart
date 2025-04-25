@@ -17,84 +17,83 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
 
+    final accesos = <Map<String, dynamic>>[
+      {
+        'label': 'Clientes',
+        'icon': Icons.people,
+        'screen': const ClienteScreen(),
+      },
+      {
+        'label': 'Ventas',
+        'icon': Icons.point_of_sale,
+        'screen': const VentaForm(),
+      },
+      {
+        'label': 'Historial de Ventas',
+        'icon': Icons.receipt_long,
+        'screen': const HistorialVentasScreen(),
+      },
+      {
+        'label': 'Reporte de Inventario',
+        'icon': Icons.inventory_2,
+        'screen': const ReporteInventarioScreen(),
+      },
+    ];
+
+    if (auth.esAdmin) {
+      accesos.insertAll(0, [
+        {
+          'label': 'Sucursales',
+          'icon': Icons.store,
+          'screen': const SucursalScreen(),
+        },
+        {
+          'label': 'Productos',
+          'icon': Icons.inventory,
+          'screen': const ProductoScreen(),
+        },
+        {
+          'label': 'Usuarios',
+          'icon': Icons.lock_person,
+          'screen': const UsuarioScreen(),
+        },
+      ]);
+    }
+
     return Scaffold(
-      appBar: const CustomAppBar(titulo: 'Sistema Inventario & Ventas'),
-      body: ListView(
-        children: [
-          if (auth.esAdmin)
-            ListTile(
-              leading: const Icon(Icons.store),
-              title: const Text('Sucursales'),
-              subtitle: const Text('Gestionar sucursales'),
-              onTap: () {
-                Navigator.push(
+      appBar: const CustomAppBar(titulo: 'Inicio'),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: ListView.separated(
+          itemCount: accesos.length,
+          separatorBuilder: (_, __) =>
+              const SizedBox(height: 8), // Menos espacio entre Cards
+          itemBuilder: (context, index) {
+            final acceso = accesos[index];
+            return Card(
+              elevation: 2,
+              margin: EdgeInsets.zero, // Eliminar margen propio del Card
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12, vertical: 8), // Más compacto
+                leading: Icon(acceso['icon'],
+                    size: 28, color: Theme.of(context).colorScheme.primary),
+                title: Text(
+                  acceso['label'],
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const SucursalScreen()),
-                );
-              },
-            ),
-          if (auth.esAdmin)
-            ListTile(
-              leading: const Icon(Icons.inventory),
-              title: const Text('Productos'),
-              subtitle: const Text('Gestionar productos'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ProductoScreen()),
-                );
-              },
-            ),
-          ListTile(
-            leading: const Icon(Icons.people),
-            title: const Text('Clientes'),
-            subtitle: const Text('Gestionar clientes'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ClienteScreen()),
-              );
-            },
-          ),
-          if (auth.esAdmin)
-            ListTile(
-              leading: const Icon(Icons.people),
-              title: const Text('Usuarios'),
-              subtitle: const Text('Gestionar usuarios del sistema'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const UsuarioScreen()),
-                );
-              },
-            ),
-          // Esto lo puede ver tanto admin como vendedor
-          ListTile(
-            leading: const Icon(Icons.point_of_sale),
-            title: const Text('Ventas'),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const VentaForm()),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.receipt_long),
-            title: const Text('Historial de Ventas'),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const HistorialVentasScreen()),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.inventory_2),
-            title: const Text('Reporte de Inventario'),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (_) => const ReporteInventarioScreen()),
-            ),
-          ),
-        ],
+                  MaterialPageRoute(builder: (_) => acceso['screen']),
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
