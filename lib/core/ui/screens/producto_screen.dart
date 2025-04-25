@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inventario_ventas/core/providers/auth.provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/productos.dart';
@@ -23,10 +24,74 @@ class _ProductoScreenState extends State<ProductoScreen> {
     context.read<SucursalProvider>().cargarSucursales();
   }
 
+  // Modal para agregar stock al prodcucto, solo los usuarios con rol admin puede verlo
+  void _mostrarDialogoAgregarStock(Producto producto) {
+    final controller = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('Agregar stock a "${producto.nombre}"'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Stock actual: ${producto.stock}',
+                style: const TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Cantidad a agregar',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final cantidad = int.tryParse(controller.text) ?? 0;
+              if (cantidad > 0) {
+                final actualizado = Producto(
+                  id: producto.id,
+                  nombre: producto.nombre,
+                  descripcion: producto.descripcion,
+                  precio: producto.precio,
+                  stock: producto.stock + cantidad,
+                  idSucursal: producto.idSucursal,
+                );
+                await context
+                    .read<ProductoProvider>()
+                    .actualizarProducto(actualizado);
+                if (context.mounted) Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      content:
+                          Text('Se agregaron $cantidad unidades al stock')),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Ingrese una cantidad válida')),
+                );
+              }
+            },
+            child: const Text('Agregar'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final productos = context.watch<ProductoProvider>().productos;
     final sucursales = context.watch<SucursalProvider>().sucursales;
+    final auth = context.watch<AuthProvider>();
 
     return Scaffold(
       appBar: const CustomAppBar(titulo: 'Productos'),
@@ -55,11 +120,28 @@ class _ProductoScreenState extends State<ProductoScreen> {
                             Text(producto.descripcion!),
                           Text(
                               'Precio: \$${producto.precio.toStringAsFixed(2)}'),
+                          Text(
+                            'Stock: ${producto.stock}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: producto.stock <= 5
+                                  ? Colors.red
+                                  : Colors.black,
+                              fontSize: 12,
+                            ),
+                          )
                         ],
                       ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          if (auth.esAdmin)
+                            IconButton(
+                              icon: const Icon(Icons.add_box),
+                              tooltip: 'Agregar stock',
+                              onPressed: () =>
+                                  _mostrarDialogoAgregarStock(producto),
+                            ),
                           IconButton(
                             icon: const Icon(Icons.edit),
                             onPressed: () {
@@ -101,7 +183,8 @@ class _ProductoScreenState extends State<ProductoScreen> {
                                     .eliminarProducto(producto.id!);
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                      content: Text('Producto eliminado')),
+                                      content: Text(
+                                          'Producto eliminado exitosamente!')),
                                 );
                               }
                             },
