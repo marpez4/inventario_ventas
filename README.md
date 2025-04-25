@@ -60,7 +60,7 @@ La base de datos local utiliza SQLite y se estructura con las siguientes tablas 
 | Campo         | Tipo     | Descripción                              |
 |---------------|----------|------------------------------------------|
 | id            | INTEGER  | Clave primaria, autoincremental          |
-| nombre        | TEXT     | Nombre de la sucursal (obligatorio)      |
+| nombre        | TEXT     | Nombre de la sucursal                    |
 | ubicacion     | TEXT     | Ubicación o dirección de la sucursal     |
 
 ---
@@ -71,10 +71,10 @@ La base de datos local utiliza SQLite y se estructura con las siguientes tablas 
 |---------------|----------|----------------------------------------------|
 | id            | INTEGER  | Clave primaria, autoincremental              |
 | nombre        | TEXT     | Nombre del producto                          |
-| descripcion   | TEXT     | Descripción opcional                         |
+| descripcion   | TEXT     | Descripción                                  |
 | precio        | REAL     | Precio unitario                              |
 | id_sucursal   | INTEGER  | FK a `sucursal`                              |
-| stock         | INTEGER  | Cantidad disponible en esa sucursal          |
+| stock         | INTEGER  | Cantidad disponible                          |
 
 
 ---
@@ -94,10 +94,10 @@ La base de datos local utiliza SQLite y se estructura con las siguientes tablas 
 | Campo       | Tipo     | Descripción                                   |
 |-------------|----------|-----------------------------------------------|
 | id          | INTEGER  | Clave primaria, autoincremental               |
-| nombre      | TEXT     | Nombre o nickname de usuario                  |
+| nombre      | TEXT     | Nombre de usuario                             |
 | correo      | TEXT     | Correo del usuario                            |
-| contrasena  | TEXT     | Contraseña (Texto plano)                      |
-| rol         | TEXT     | Rol del usuario (ej: `admin`, `vendedor`)     |
+| contrasena  | TEXT     | Contraseña                                    |
+| rol         | TEXT     | Rol del usuario ( `admin`, `vendedor`)        |
 
 ---
 
@@ -108,7 +108,7 @@ La base de datos local utiliza SQLite y se estructura con las siguientes tablas 
 | id            | INTEGER  | Clave primaria                                             |
 | fecha         | TEXT     | Fecha y hora de la venta                                   |
 | id_sucursal   | INTEGER  | FK a `sucursal`                                            |
-| id_cliente    | INTEGER  | FK a `cliente` (Si es `NULL` es venta sin cliente)         |
+| id_cliente    | INTEGER  | FK a `cliente`                                             |
 | metodo_pago   | TEXT     | Texto indicando método (Efectivo, Tarjeta, etc.)           |
 | total         | REAL     | Total de la venta                                          |
 
@@ -123,8 +123,6 @@ La base de datos local utiliza SQLite y se estructura con las siguientes tablas 
 | id_producto     | INTEGER  | FK a `producto`                                     |
 | cantidad        | INTEGER  | Cantidad de ese producto vendido                    |
 | precio_unitario | REAL     | Precio del producto al momento de la venta          |
-
-> 🔗 Esta tabla permite una relación muchos a muchos entre `venta` y `producto`.
 
 ---
 
@@ -147,11 +145,85 @@ Al iniciar por primera vez la aplicación, el sistema crea automáticamente dos 
 | Admin Principal  | admin     | admin@iv.com     | admin123       |
 | Vendedor Uno     | vendedor  | vendedor@iv.com  | vendedor123    |
 
-### 🔐 Detalles:
+### 🚀 Control de Acceso por Roles
 
 - **Admin** tiene acceso completo a todos los módulos: sucursales, productos, ventas, clientes, usuarios, reportes.
 - **Vendedor** solo tiene acceso a funciones básicas como gestión de clientes, registrar ventas y consultar información.
 
 ### 🛠 ¿Cómo se crean?
 
-Estos usuarios se insertan automáticamente en la base de datos local (SQLite) cuando se genera por primera vez, en el método `_onCreate()` de `DatabaseHelper`.
+> Estos usuarios se insertan automáticamente en la base de datos local (SQLite) cuando se genera por primera vez, en el método `_onCreate()` de `DatabaseHelper`.
+
+
+### ⚙️ Procesos de Venta y Simulación de Pago
+
+El sistema sigue el siguiente flujo para registrar una venta:
+
+1. Selección de sucursal donde ocurre la venta.
+
+2. Selección de cliente.
+
+3. Selección del método de pago (Efectivo, Tarjeta o PayPal).
+
+4. Selección de productos disponibles en la sucursal (solo productos en stock).
+
+5. Visualización automática del total de la venta conforme se agregan productos.
+
+6. Simulación de pago:
+
+   - Antes de registrar la venta se muestra un diálogo que simula el procesamiento del pago durante unos segundos.
+
+   - Se muestra el método de pago seleccionado y el total.
+
+7. Registro de venta exitoso:
+
+    - Se guardan los detalles de la venta en la base de datos.
+
+    - Se actualiza el inventario descontando el stock de cada producto vendido.
+
+> El pago simulado no utiliza pasarelas externas y no maneja información sensible.
+
+### 📊Módulo de Reportes
+El sistema implementa dos reportes básicos, accesibles desde el menú principal:
+
+📈 Reporte de Ventas
+- Muestra la lista de todas las ventas registradas.
+
+- Permite filtrar las ventas por:
+
+    - Sucursal
+
+    - Rango de fechas
+
+- Muestra:
+
+    - Fecha de venta
+
+    - Sucursal
+
+    - Cliente
+
+    - Método de pago
+
+    - Productos vendidos
+
+    - Total de la venta
+
+- Visualización en tarjetas (Cards) limpias con ExpansionTile.
+
+### 📦 Reporte de Inventario
+- Muestra los productos agrupados por sucursal.
+
+- Para cada producto se visualiza:
+
+  - Nombre
+
+  - Descripción
+
+  - Precio
+
+  - Stock disponible
+
+- Los productos con stock bajo (≤5) se destacan en color rojo para alertar al usuario.
+
+- Visualización en tarjetas modernas.
