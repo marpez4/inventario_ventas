@@ -1,5 +1,40 @@
 # Inventario ventas
 
+## Instrucciones de Instalación y Configuración
+📋 Requisitos mínimos
+- Flutter SDK 3.0.0 o superior
+- Dart SDK 2.17.0 o superior
+- Android Studio 4.0+ / Xcode 13+ (según plataforma)
+- Dispositivo o emulador con Android 5.0+ / iOS 11.0+
+
+🚀 Pasos para clonar y configurar el proyecto
+1. Clone el repositorio en su máquina local:
+
+> git clone https://github.com/marpez4/inventario_ventas.git
+
+> cd inventario_ventas
+
+2. Instale las dependencias del proyecto:
+
+> flutter pub get
+
+3. Verifique que todo esté configurado correctamente:
+
+> flutter doctor
+
+▶️ Comandos para ejecutar la aplicación
+Para ejecutar en modo debug:
+
+> flutter run
+
+## 🛠️ Tecnologías Utilizadas
+
+- Flutter SDK 3.x
+- Dart 2.x
+- SQLite (local database)
+- Material Design 3
+
+
 ## 📁 Estructura de Carpetas del Proyecto
 
 A continuación se muestra la estructura principal del proyecto, esto para mantener el código organizado y modularizado:
@@ -16,7 +51,7 @@ lib/
 ├── ui/                  # Interfaz de usuario
 │   ├── screens/         # Pantallas principales
 │   └── widgets/         # Componentes reutilizables
-└── providers/           # Gestión de estado (ej. Provider)
+└── providers/           # Gestión de estado
 ````
 
 ## 📚 Dependencias del Proyecto
