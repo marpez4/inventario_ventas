@@ -26,6 +26,8 @@ class _SucursalScreenState extends State<SucursalScreen> {
       appBar: const CustomAppBar(titulo: 'Sucursal'),
       body: provider.isLoading
           ? const Center(child: CircularProgressIndicator())
+          :provider.sucursales.isEmpty
+          ? const Center(child: Text('No hay sucursales registradas'))
           : ListView.builder(
               itemCount: provider.sucursales.length,
               itemBuilder: (context, index) {
