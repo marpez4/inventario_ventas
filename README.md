@@ -165,8 +165,7 @@ La base de datos local utiliza SQLite y se estructura con las siguientes tablas 
 
 - Una `sucursal` tiene muchos `productos` y muchas `ventas`.
 - Un `producto` puede aparecer en muchas `ventas`, y cada `venta` puede tener muchos `productos` (relación a través de `detalle_venta`).
-- Una `venta` puede o no estar ligada a un `cliente`.
-- Un `usuario` accede a la app, pero no es estrictamente necesario relacionarlo con cada venta.
+- Una `venta` esta ligada a un `cliente`.
 
 ---
 
